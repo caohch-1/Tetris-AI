@@ -1,0 +1,8 @@
+gym==0.18.0
+stable_baselines3==1.1.0
+tqdm==4.51.0
+opencv_python==4.5.1.48
+matplotlib==3.4.2
+numpy==1.19.5
+dataclasses==0.8
+Pillow==8.4.0

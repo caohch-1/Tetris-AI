@@ -1,0 +1,12 @@
+include CODE_OF_CONDUCT.md
+include CONTRIBUTING.md
+include examples.py
+include LICENSE.md
+include pyproject.toml
+include README.md
+include requirements.txt
+include run_heuristic_agent.py
+include run_q_learning_agent.py
+include run_uniform_agent.py
+include run_tests.py
+include setup.py
