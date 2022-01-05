@@ -126,9 +126,11 @@ class Tetris:
         total_bumpiness = np.sum(diffs)
         return total_bumpiness, total_height
 
-    # 返回一个dict，其中每个元素是 (1, 0): tensor([ 0.,  2., 10., 10.])，代表x轴坐标，rotate次数，[清除掉的行数，总共的holes数量，颠簸度，总block高度]
-    # 也就是说，它返回的每个state都是block已经下落到底端以后的state
     def get_next_states(self):
+        """
+        返回的每个state都是block已经下落到底端以后的state
+        :return: dict，其中每个元素是 (x轴坐标，rotate次数)，[清除掉的行数，总共的holes数量，颠簸度，总block高度]
+        """
         states = {}
         # 选出一块piece
         piece_id = self.ind

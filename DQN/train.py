@@ -9,11 +9,36 @@ from random import random, randint, sample
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.backends.cudnn as cudnn
+import torch.optim as optim
 from tensorboardX import SummaryWriter
 
-from src.deep_q_network import DeepQNetwork
 from src.tetris import Tetris
 from collections import deque
+
+
+class DeepQNetwork(nn.Module):
+    def __init__(self):
+        super(DeepQNetwork, self).__init__()
+
+        self.conv1 = nn.Sequential(nn.Linear(4, 64), nn.ReLU(inplace=True))
+        self.conv2 = nn.Sequential(nn.Linear(64, 64), nn.ReLU(inplace=True))
+        self.conv3 = nn.Sequential(nn.Linear(64, 1))
+
+        self._create_weights()
+
+    def _create_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
+                nn.init.constant_(m.bias, 0)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+
+        return x
 
 
 def get_args():
@@ -21,6 +46,7 @@ def get_args():
         """Implementation of Deep Q Network to play Tetris""")
     parser.add_argument("--width", type=int, default=10, help="The common width for all images")
     parser.add_argument("--height", type=int, default=20, help="The common height for all images")
+    # Every block is a square, block_size means len of its side
     parser.add_argument("--block_size", type=int, default=30, help="Size of a block")
     parser.add_argument("--batch_size", type=int, default=512, help="The number of images per batch")
     parser.add_argument("--lr", type=float, default=1e-3)
@@ -34,59 +60,74 @@ def get_args():
                         help="Number of epoches between testing phases")
     parser.add_argument("--log_path", type=str, default="tensorboard")
     parser.add_argument("--saved_path", type=str, default="trained_models")
+    parser.add_argument("--gui", type=bool, default=True)
 
     args = parser.parse_args()
     return args
 
 
+def setup_seed(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.backends.cudnn.deterministic = True
+
+
 def train(opt):
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed(123)
-    else:
-        torch.manual_seed(123)
+    """Preparation for Logging"""
     if os.path.isdir(opt.log_path):
         shutil.rmtree(opt.log_path)
     os.makedirs(opt.log_path)
     writer = SummaryWriter(opt.log_path)
-    env = Tetris(width=opt.width, height=opt.height, block_size=opt.block_size)
-    model = DeepQNetwork()
-    optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr)
-    criterion = nn.MSELoss()
 
+    """Preparation for Network and Tetris Env."""
+    env = Tetris(width=opt.width, height=opt.height, block_size=opt.block_size)
     state = env.reset()
+    net = DeepQNetwork()
+    optimizer = optim.Adam(net.parameters(), lr=opt.lr)
+    criterion = nn.MSELoss()
+    epoch = 0
     if torch.cuda.is_available():
-        model.cuda()
+        net = torch.nn.DataParallel(net)
+        cudnn.benchmark = True
+        net.to('cuda')
         state = state.cuda()
 
-    replay_memory = deque(maxlen=opt.replay_memory_size)
-    epoch = 0
+    replay_memory = deque(maxlen=opt.replay_memory_size)  # Todo: What's this?
+
     while epoch < opt.num_epochs:
-        next_steps = env.get_next_states()
-        # Exploration or exploitation
+        # Exploration Function
         epsilon = opt.final_epsilon + (max(opt.num_decay_epochs - epoch, 0) * (
                 opt.initial_epsilon - opt.final_epsilon) / opt.num_decay_epochs)
-        u = random()
-        random_action = u <= epsilon
+
+        # Get all possible states
+        next_steps = env.get_next_states()
         next_actions, next_states = zip(*next_steps.items())
         next_states = torch.stack(next_states)
         if torch.cuda.is_available():
             next_states = next_states.cuda()
-        model.eval()
+
+        # Evaluate every state, predictions is a list contains scores for each state
+        net.eval()
         with torch.no_grad():
-            predictions = model(next_states)[:, 0]
-        model.train()
-        if random_action:
+            predictions = net(next_states)[:, 0]
+        net.train()
+
+        # Choose action (i.e., choose best next state)
+        if random() <= epsilon:
             index = randint(0, len(next_steps) - 1)
         else:
             index = torch.argmax(predictions).item()
 
+        # Run the chosen action and get reward
         next_state = next_states[index, :]
         action = next_actions[index]
-
-        reward, done = env.step(action, render=True)
-
+        reward, done = env.step(action, render=opt.gui)
         if torch.cuda.is_available():
             next_state = next_state.cuda()
+
+        # If game-over and replay_memory (i.e., training data) is sufficient, we train the net
         replay_memory.append([state, reward, next_state, done])
         if done:
             final_score = env.score
@@ -98,25 +139,28 @@ def train(opt):
         else:
             state = next_state
             continue
+
         if len(replay_memory) < opt.replay_memory_size / 10:
             continue
-        epoch += 1
+
+        # Prepare data for training (in batch size)
         batch = sample(replay_memory, min(len(replay_memory), opt.batch_size))
         state_batch, reward_batch, next_state_batch, done_batch = zip(*batch)
         state_batch = torch.stack(tuple(state for state in state_batch))
         reward_batch = torch.from_numpy(np.array(reward_batch, dtype=np.float32)[:, None])
         next_state_batch = torch.stack(tuple(state for state in next_state_batch))
-
         if torch.cuda.is_available():
             state_batch = state_batch.cuda()
             reward_batch = reward_batch.cuda()
             next_state_batch = next_state_batch.cuda()
 
-        q_values = model(state_batch)
-        model.eval()
+        # Update Q_value (i.e., train net), here |Q - (R + gamma * Q')|
+        q_values = net(state_batch)
+
+        net.eval()
         with torch.no_grad():
-            next_prediction_batch = model(next_state_batch)
-        model.train()
+            next_prediction_batch = net(next_state_batch)
+        net.train()
 
         y_batch = torch.cat(
             tuple(reward if done else reward + opt.gamma * prediction for reward, done, prediction in
@@ -127,6 +171,7 @@ def train(opt):
         loss.backward()
         optimizer.step()
 
+        epoch += 1
         print("Epoch: {}/{}, Action: {}, Score: {}, Tetrominoes {}, Cleared lines: {}".format(
             epoch,
             opt.num_epochs,
@@ -137,11 +182,11 @@ def train(opt):
         writer.add_scalar('Train/Score', final_score, epoch - 1)
         writer.add_scalar('Train/Tetrominoes', final_tetrominoes, epoch - 1)
         writer.add_scalar('Train/Cleared lines', final_cleared_lines, epoch - 1)
-
+        
         if epoch > 0 and epoch % opt.save_interval == 0:
-            torch.save(model, "{}/tetris_{}".format(opt.saved_path, epoch))
+            torch.save(net, "{}/tetris_{}".format(opt.saved_path, epoch))
 
-    torch.save(model, "{}/tetris".format(opt.saved_path))
+    torch.save(net, "{}/tetris".format(opt.saved_path))
 
 
 if __name__ == "__main__":

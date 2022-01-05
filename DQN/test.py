@@ -45,6 +45,7 @@ def test(opt):
         if torch.cuda.is_available():
             next_states = next_states.cuda()
         predictions = model(next_states)[:, 0]
+        print(next_states.shape, predictions.shape)
         index = torch.argmax(predictions).item()
         action = next_actions[index]
         _, done = env.step(action, render=True, video=out)
