@@ -17,13 +17,15 @@ from src.tetris import Tetris
 from collections import deque
 
 
+# Todo: Change to fit new feature vector (i.e. 204 input dim.)
 class DeepQNetwork(nn.Module):
     def __init__(self):
         super(DeepQNetwork, self).__init__()
 
-        self.conv1 = nn.Sequential(nn.Linear(4, 64), nn.ReLU(inplace=True))
-        self.conv2 = nn.Sequential(nn.Linear(64, 64), nn.ReLU(inplace=True))
-        self.conv3 = nn.Sequential(nn.Linear(64, 1))
+        self.fc1 = nn.Sequential(nn.Linear(4, 256), nn.ReLU(inplace=True))
+        self.fc2 = nn.Sequential(nn.Linear(256, 128), nn.ReLU(inplace=True))
+        self.fc3 = nn.Sequential(nn.Linear(128, 64), nn.ReLU(inplace=True))
+        self.out = nn.Sequential(nn.Linear(64, 1))
 
         self._create_weights()
 
@@ -34,9 +36,10 @@ class DeepQNetwork(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
+        x = self.fc1(x)
+        x = self.fc2(x)
+        x = self.fc3(x)
+        x = self.out(x)
 
         return x
 
@@ -48,7 +51,7 @@ def get_args():
     parser.add_argument("--height", type=int, default=20, help="The common height for all images")
     # Every block is a square, block_size means len of its side
     parser.add_argument("--block_size", type=int, default=30, help="Size of a block")
-    parser.add_argument("--batch_size", type=int, default=512, help="The number of images per batch")
+    parser.add_argument("--batch_size", type=int, default=512, help="The number of replays per batch")
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--gamma", type=float, default=0.99)
     parser.add_argument("--initial_epsilon", type=float, default=1)
@@ -60,7 +63,7 @@ def get_args():
                         help="Number of epoches between testing phases")
     parser.add_argument("--log_path", type=str, default="tensorboard")
     parser.add_argument("--saved_path", type=str, default="trained_models")
-    parser.add_argument("--gui", type=bool, default=True)
+    parser.add_argument("--gui", type=int, default=1)
 
     args = parser.parse_args()
     return args
@@ -94,7 +97,7 @@ def train(opt):
         net.to('cuda')
         state = state.cuda()
 
-    replay_memory = deque(maxlen=opt.replay_memory_size)  # Todo: What's this?
+    replay_memory = deque(maxlen=opt.replay_memory_size)
 
     while epoch < opt.num_epochs:
         # Exploration Function
@@ -172,17 +175,16 @@ def train(opt):
         optimizer.step()
 
         epoch += 1
-        print("Epoch: {}/{}, Action: {}, Score: {}, Tetrominoes {}, Cleared lines: {}".format(
+        print("Epoch: {}/{}, Score: {}, Tetrominoes {}, Cleared lines: {}".format(
             epoch,
             opt.num_epochs,
-            action,
             final_score,
             final_tetrominoes,
             final_cleared_lines))
         writer.add_scalar('Train/Score', final_score, epoch - 1)
         writer.add_scalar('Train/Tetrominoes', final_tetrominoes, epoch - 1)
         writer.add_scalar('Train/Cleared lines', final_cleared_lines, epoch - 1)
-        
+
         if epoch > 0 and epoch % opt.save_interval == 0:
             torch.save(net, "{}/tetris_{}".format(opt.saved_path, epoch))
 

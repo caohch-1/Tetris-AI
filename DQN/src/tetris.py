@@ -92,10 +92,8 @@ class Tetris:
         lines_cleared, board = self.check_cleared_rows(board)
         holes = self.get_holes(board)
         bumpiness, height = self.get_bumpiness_and_height(board)
-
-        # 组合list [清除掉的行数，总共的holes数量，颠簸度，总block高度]
-        # tensor([0., 1., 6., 5.])
-        return torch.FloatTensor([lines_cleared, holes, bumpiness, height])
+        result = [lines_cleared, holes, bumpiness, height]
+        return torch.FloatTensor(result)
 
     # 如果一列从上到下是:0 0 0 1 1 1 0 1 0 1，那么hole就是2.这里返回所有hole的总数
     def get_holes(self, board):
