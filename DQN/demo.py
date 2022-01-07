@@ -5,7 +5,7 @@ import argparse
 import torch
 import cv2
 from src.tetris import Tetris
-from train import DeepQNetwork
+from src.deep_q_network import DQN256, DQN64
 import random
 
 import numpy as np
@@ -25,7 +25,7 @@ def get_args():
     parser.add_argument("--height", type=int, default=20, help="The common height for all images")
     parser.add_argument("--block_size", type=int, default=30, help="Size of a block")
     parser.add_argument("--fps", type=int, default=300, help="frames per second")
-    parser.add_argument("--saved_path", type=str, default="trained_models")
+    parser.add_argument("--saved_path", type=str, default="trained_models128")
     parser.add_argument("--output", type=str, default="output.mp4")
 
     args = parser.parse_args()

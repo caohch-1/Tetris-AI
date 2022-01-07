@@ -1,7 +1,3 @@
-"""
-@author: Viet Nguyen <nhviet1009@gmail.com>
-"""
-import argparse
 import os
 import shutil
 from random import random, randint, sample
@@ -11,62 +7,11 @@ import torch
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
-from tensorboardX import SummaryWriter
 
 from src.tetris import Tetris
+from src.deep_q_network import DQN256, DQN128, DQN64, ConvNet
+from src.arg_parser import get_args
 from collections import deque
-
-
-# Todo: Change to fit new feature vector (i.e. 204 input dim.)
-class DeepQNetwork(nn.Module):
-    def __init__(self):
-        super(DeepQNetwork, self).__init__()
-
-        self.fc1 = nn.Sequential(nn.Linear(4, 256), nn.ReLU(inplace=True))
-        self.fc2 = nn.Sequential(nn.Linear(256, 128), nn.ReLU(inplace=True))
-        self.fc3 = nn.Sequential(nn.Linear(128, 64), nn.ReLU(inplace=True))
-        self.out = nn.Sequential(nn.Linear(64, 1))
-
-        self._create_weights()
-
-    def _create_weights(self):
-        for m in self.modules():
-            if isinstance(m, nn.Linear):
-                nn.init.xavier_uniform_(m.weight)
-                nn.init.constant_(m.bias, 0)
-
-    def forward(self, x):
-        x = self.fc1(x)
-        x = self.fc2(x)
-        x = self.fc3(x)
-        x = self.out(x)
-
-        return x
-
-
-def get_args():
-    parser = argparse.ArgumentParser(
-        """Implementation of Deep Q Network to play Tetris""")
-    parser.add_argument("--width", type=int, default=10, help="The common width for all images")
-    parser.add_argument("--height", type=int, default=20, help="The common height for all images")
-    # Every block is a square, block_size means len of its side
-    parser.add_argument("--block_size", type=int, default=30, help="Size of a block")
-    parser.add_argument("--batch_size", type=int, default=512, help="The number of replays per batch")
-    parser.add_argument("--lr", type=float, default=1e-3)
-    parser.add_argument("--gamma", type=float, default=0.99)
-    parser.add_argument("--initial_epsilon", type=float, default=1)
-    parser.add_argument("--final_epsilon", type=float, default=1e-3)
-    parser.add_argument("--num_decay_epochs", type=float, default=2000)
-    parser.add_argument("--num_epochs", type=int, default=3000)
-    parser.add_argument("--save_interval", type=int, default=1000)
-    parser.add_argument("--replay_memory_size", type=int, default=30000,
-                        help="Number of epoches between testing phases")
-    parser.add_argument("--log_path", type=str, default="tensorboard")
-    parser.add_argument("--saved_path", type=str, default="trained_models")
-    parser.add_argument("--gui", type=int, default=1)
-
-    args = parser.parse_args()
-    return args
 
 
 def setup_seed(seed):
@@ -82,12 +27,20 @@ def train(opt):
     if os.path.isdir(opt.log_path):
         shutil.rmtree(opt.log_path)
     os.makedirs(opt.log_path)
-    writer = SummaryWriter(opt.log_path)
 
     """Preparation for Network and Tetris Env."""
     env = Tetris(width=opt.width, height=opt.height, block_size=opt.block_size)
     state = env.reset()
-    net = DeepQNetwork()
+    net = None
+    if opt.model == 'DQN64':
+        net = DQN64()
+    elif opt.model == 'DQN128':
+        net = DQN128()
+    elif opt.model == 'DQN256':
+        net = DQN256()
+    else:
+        print("Wrong model type!")
+        exit(-1)
     optimizer = optim.Adam(net.parameters(), lr=opt.lr)
     criterion = nn.MSELoss()
     epoch = 0
@@ -99,6 +52,7 @@ def train(opt):
 
     replay_memory = deque(maxlen=opt.replay_memory_size)
 
+    print("Train start with epochs={}, decay_epochs={}, lr={}, model={}, saved_path={}, gui={}".format(opt.num_epochs, opt.num_decay_epochs, opt.lr, opt.model, opt.saved_path, bool(opt.gui)))
     while epoch < opt.num_epochs:
         # Exploration Function
         epsilon = opt.final_epsilon + (max(opt.num_decay_epochs - epoch, 0) * (
@@ -118,10 +72,7 @@ def train(opt):
         net.train()
 
         # Choose action (i.e., choose best next state)
-        if random() <= epsilon:
-            index = randint(0, len(next_steps) - 1)
-        else:
-            index = torch.argmax(predictions).item()
+        index = randint(0, len(next_steps) - 1) if random() <= epsilon else torch.argmax(predictions).item()
 
         # Run the chosen action and get reward
         next_state = next_states[index, :]
@@ -181,9 +132,6 @@ def train(opt):
             final_score,
             final_tetrominoes,
             final_cleared_lines))
-        writer.add_scalar('Train/Score', final_score, epoch - 1)
-        writer.add_scalar('Train/Tetrominoes', final_tetrominoes, epoch - 1)
-        writer.add_scalar('Train/Cleared lines', final_cleared_lines, epoch - 1)
 
         if epoch > 0 and epoch % opt.save_interval == 0:
             torch.save(net, "{}/tetris_{}".format(opt.saved_path, epoch))
@@ -192,5 +140,5 @@ def train(opt):
 
 
 if __name__ == "__main__":
-    opt = get_args()
+    opt = get_args(train=True)
     train(opt)
