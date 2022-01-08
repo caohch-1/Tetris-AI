@@ -5,7 +5,7 @@ import argparse
 import torch
 import cv2
 from src.tetris import Tetris
-from src.deep_q_network import DQN256, DQN64
+from src.nets import DQN256, DQN64
 import random
 
 import numpy as np

@@ -1,9 +1,8 @@
 import torch
 import torch.backends.cudnn as cudnn
 from src.tetris import Tetris
-from src.deep_q_network import ConvNet, MLP
+from src.nets import ConvNet, MLP
 from src.arg_parser import get_args
-import random
 
 import numpy as np
 
@@ -53,4 +52,5 @@ if __name__ == "__main__":
         total[0] += temp[0]
         total[1] += temp[1]
         total[2] += temp[2]
-        print(i, np.array(total) / (i + 1))
+        if i % (opt.test_num / 5) == 0:
+            print(i, np.array(total) / (i + 1))

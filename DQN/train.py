@@ -9,7 +9,7 @@ import torch.backends.cudnn as cudnn
 import torch.optim as optim
 
 from src.tetris import Tetris
-from src.deep_q_network import ConvNet, MLP
+from src.nets import ConvNet, MLP
 from src.arg_parser import get_args
 from collections import deque
 
