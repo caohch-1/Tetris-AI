@@ -9,7 +9,7 @@ import torch.backends.cudnn as cudnn
 import torch.optim as optim
 
 from src.tetris import Tetris
-from src.deep_q_network import DQN256, DQN128, DQN64, ConvNet
+from src.deep_q_network import ConvNet, MLP
 from src.arg_parser import get_args
 from collections import deque
 
@@ -31,16 +31,7 @@ def train(opt):
     """Preparation for Network and Tetris Env."""
     env = Tetris(width=opt.width, height=opt.height, block_size=opt.block_size)
     state = env.reset()
-    net = None
-    if opt.model == 'DQN64':
-        net = DQN64()
-    elif opt.model == 'DQN128':
-        net = DQN128()
-    elif opt.model == 'DQN256':
-        net = DQN256()
-    else:
-        print("Wrong model type!")
-        exit(-1)
+    net = MLP(input_num=4, hidden_num=opt.model)
     optimizer = optim.Adam(net.parameters(), lr=opt.lr)
     criterion = nn.MSELoss()
     epoch = 0

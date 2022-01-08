@@ -21,7 +21,7 @@ def get_args(train: bool):
         parser.add_argument("--log_path", type=str, default="tensorboard")
         parser.add_argument("--saved_path", type=str, default="trained_models128")
         parser.add_argument("--gui", type=int, default=1)
-        parser.add_argument("--model", type=str, default='DQN64')
+        parser.add_argument("--model", type=int, default=64)
 
         args = parser.parse_args()
         return args
