@@ -62,3 +62,7 @@ if __name__ == "__main__":
         total[1] += temp[1]
         total[2] += temp[2]
         print(i, np.array(total) / (i + 1))
+
+#要得到 [清除掉的行数，总共的holes数量，颠簸度，总block高度] + 灰度图，调用get_next_state_img(self)而不是之前的get_next_states()
+#如果要额外得到 [清除掉的行数，总共的holes数量，颠簸度，总block高度] + 列差 + 灰度图，调用get_next_state_img(self)，并在这个函数 (line 220)
+# states[(x, i)] = self.get_state_properties(board, temp_board, col_diff=True) 中令 col_diff=True
