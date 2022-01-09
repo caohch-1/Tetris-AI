@@ -18,7 +18,6 @@ def get_args(train: bool):
         parser.add_argument("--final_epsilon", type=float, default=1e-3)
         parser.add_argument("--num_decay_epochs", type=float, default=2000)
         parser.add_argument("--num_epochs", type=int, default=3000)
-        parser.add_argument("--replay_memory_size", type=int, default=30000)
 
         parser.add_argument("--save_interval", type=int, default=1000)
         parser.add_argument("--saved_path", type=str, default="trained_models64")

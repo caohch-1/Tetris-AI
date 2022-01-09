@@ -1,5 +1,3 @@
-import os
-import shutil
 from random import random, randint, sample
 
 import numpy as np
@@ -28,7 +26,7 @@ def train(opt):
         net.to('cuda')
         state = state.cuda()
 
-    replay_memory = deque(maxlen=opt.replay_memory_size)
+    execution_record = deque(maxlen=30000)
 
     print("Train start with epochs={}, decay_epochs={}, lr={}, model={}, saved_path={}, gui={}".format(opt.num_epochs, opt.num_decay_epochs, opt.lr, opt.model, opt.saved_path, bool(opt.gui)))
     while epoch < opt.num_epochs:
@@ -65,7 +63,7 @@ def train(opt):
 
         # If game-over and replay_memory (i.e., training data) is sufficient, we train the net
         if state.shape[0] == opt.input_features:
-            replay_memory.append([state, reward, next_state, done])
+            execution_record.append([state, reward, next_state, done])
         if done:
             final_score = env.score
             final_tetrominoes = env.tetrominoes
@@ -77,11 +75,11 @@ def train(opt):
             state = next_state
             continue
 
-        if len(replay_memory) < opt.replay_memory_size / 10:
+        if len(execution_record) < 3000:
             continue
 
         # Prepare data for training (in batch size)
-        batch = sample(replay_memory, min(len(replay_memory), opt.batch_size))
+        batch = sample(execution_record, min(len(execution_record), opt.batch_size))
         state_batch, reward_batch, next_state_batch, done_batch = zip(*batch)
         state_batch = torch.stack(tuple(state for state in state_batch))
         reward_batch = torch.from_numpy(np.array(reward_batch, dtype=np.float32)[:, None])

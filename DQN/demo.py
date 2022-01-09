@@ -6,10 +6,6 @@ import torch
 import cv2
 from src.tetris import Tetris
 from src.deep_q_network import MLP
-import random
-
-import numpy as np
-
 from src.arg_parser import get_args
 
 
