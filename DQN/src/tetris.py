@@ -7,6 +7,7 @@ import cv2
 from matplotlib import style
 import torch
 import random
+import copy
 
 style.use("ggplot")
 
@@ -73,8 +74,11 @@ class Tetris:
         self.gameover = False
         return self.get_state_properties(self.board)
 
-    # 顺时针旋转
     def rotate(self, piece):
+        '''
+
+        顺时针旋转
+        '''
         num_rows_orig = num_cols_new = len(piece)
         # 宽高互换
         num_rows_new = len(piece[0])
@@ -87,16 +91,34 @@ class Tetris:
             rotated_array.append(new_row)
         return rotated_array
 
-    # 返回 组合list [清除掉的行数，总共的holes数量，颠簸度，总block高度]
-    def get_state_properties(self, board):
+    def get_state_properties(self, board, extra2 = None, col_diff = False):
+        '''
+        :extra2: 二位列表，适配于get_next_state_img
+        :return: 组合list [清除掉的行数，总共的holes数量，颠簸度，总block高度]
+        '''
         lines_cleared, board = self.check_cleared_rows(board)
         holes = self.get_holes(board)
         bumpiness, height = self.get_bumpiness_and_height(board)
         result = [lines_cleared, holes, bumpiness, height]
+        if col_diff == True:
+            board = np.array(board)
+            mask = board != 0
+            invert_heights = np.where(mask.any(axis=0), np.argmax(mask, axis=0), self.height)
+            heights = self.height - invert_heights
+            for i in range(self.width-1):
+                result.append(abs(heights[i] - heights[i+1]))
+
+        if extra2:
+            for row in extra2:
+                for item in row:
+                    result.append(item)
         return torch.FloatTensor(result)
 
-    # 如果一列从上到下是:0 0 0 1 1 1 0 1 0 1，那么hole就是2.这里返回所有hole的总数
     def get_holes(self, board):
+        '''
+
+        如果一列从上到下是:0 0 0 1 1 1 0 1 0 1，那么hole就是2.这里返回所有hole的总数
+        '''
         num_holes = 0
         for col in zip(*board):
             row = 0
@@ -105,8 +127,11 @@ class Tetris:
             num_holes += len([x for x in col[row + 1:] if x == 0])
         return num_holes
 
-    # 返回颠簸度和总block高度
     def get_bumpiness_and_height(self, board):
+        '''
+
+        返回颠簸度和总block高度
+        '''
         board = np.array(board)
         mask = board != 0
         # 从上往下数，直到block的最高点的 距离。如果宽为10， 那么形式为[20 17 18 20 20 20 20 20 20 20]
@@ -159,16 +184,62 @@ class Tetris:
             curr_piece = self.rotate(curr_piece)
         return states
 
-    # board + 当前位置显示piece
+    def get_next_state_img(self):
+        states = {}
+        piece_id = self.ind
+        curr_piece = [row[:] for row in self.piece]
+
+        if piece_id == 0:  # O piece
+            num_rotations = 1
+        elif piece_id == 2 or piece_id == 3 or piece_id == 4:
+            num_rotations = 2
+        else:
+            num_rotations = 4
+
+        for i in range(num_rotations):
+            valid_xs = self.width - len(curr_piece[0])
+            for x in range(valid_xs + 1):
+                piece = [row[:] for row in curr_piece]
+                pos = {"x": x, "y": 0}
+                while not self.check_collision(piece, pos):
+                    pos["y"] += 1
+                self.truncate(piece, pos)
+                temp_board = copy.deepcopy(self.board)
+                for row in range(self.height):
+                    for item in range(self.width):
+                        if temp_board[row][item] != 0:
+                            temp_board[row][item] = 255
+
+                board = self.store(piece, pos)
+                temp_board = self.store_img(piece, pos, temp_board)
+                for row in range(self.height):
+                    for item in range(self.width):
+                        if not (temp_board[row][item] == 0 or temp_board[row][item] == 255):
+                            temp_board[row][item] = 150
+
+                states[(x, i)] = self.get_state_properties(board, temp_board, col_diff=False)
+                # for row in temp_board:
+                #     for item in row:
+                #         #states[(x, i)].append(item)
+            curr_piece = self.rotate(curr_piece)
+        return states
+
     def get_current_board_state(self):
+        '''
+
+        board + 当前位置显示piece
+        '''
         board = [x[:] for x in self.board]
         for y in range(len(self.piece)):
             for x in range(len(self.piece[y])):
                 board[y + self.current_pos["y"]][x + self.current_pos["x"]] = self.piece[y][x]
         return board
 
-    # 生成一个新的block，把current_pos设为：屏幕中央-block的一半
     def new_piece(self):
+        '''
+
+        生成一个新的block，把current_pos设为：屏幕中央-block的一半
+        '''
         if not len(self.bag):
             self.bag = list(range(len(self.pieces)))
             random.shuffle(self.bag)
@@ -180,8 +251,11 @@ class Tetris:
         if self.check_collision(self.piece, self.current_pos):
             self.gameover = True
 
-    # 检查是否发生碰撞。如果低于最低高度或者刚好不碰撞：返回True
     def check_collision(self, piece, pos):
+        '''
+
+        检查是否发生碰撞。如果低于最低高度或者刚好不碰撞：返回True
+        '''
         future_y = pos["y"] + 1
         for y in range(len(piece)):
             for x in range(len(piece[y])):
@@ -189,8 +263,11 @@ class Tetris:
                     return True
         return False
 
-    # 用来判断加上block之后会不会导致gameover
     def truncate(self, piece, pos):
+        '''
+
+        用来判断加上block之后会不会导致gameover
+        '''
         gameover = False
         last_collision_row = -1
         for y in range(len(piece)):
@@ -210,8 +287,11 @@ class Tetris:
                             last_collision_row = y
         return gameover
 
-    # 储存添加上block之后的board
     def store(self, piece, pos):
+        '''
+
+        储存添加上block之后的board
+        '''
         board = [x[:] for x in self.board]
         for y in range(len(piece)):
             for x in range(len(piece[y])):
@@ -219,9 +299,19 @@ class Tetris:
                     board[y + pos["y"]][x + pos["x"]] = piece[y][x]
         return board
 
-    # 遍历每一行，如果一行中没有0，就（调用remove_row）把这行去掉
-    # 返回（删掉了几行，删完后的board）
+    def store_img(selfself, piece, pos, img):
+        for y in range(len(piece)):
+            for x in range(len(piece[y])):
+                if piece[y][x] and not img[y + pos["y"]][x + pos["x"]]:
+                    img[y + pos["y"]][x + pos["x"]] = piece[y][x]
+        return img
+
     def check_cleared_rows(self, board):
+        '''
+        遍历每一行，如果一行中没有0，就（调用remove_row）把这行去掉
+
+        :return: （删掉了几行，删完后的board）
+        '''
         to_delete = []
         for i, row in enumerate(board[::-1]):
             if 0 not in row:
@@ -230,17 +320,26 @@ class Tetris:
             board = self.remove_row(board, to_delete)
         return len(to_delete), board
 
-    # 去掉indices所在的行，并在总体上面加一个空行
-    # 返回删掉后的board
+    #
     def remove_row(self, board, indices):
+        '''
+
+        去掉indices所在的行，并在总体上面加一个空行
+
+        :return: 删掉后的board
+        '''
         for i in indices[::-1]:
             del board[i]
             board = [[0 for _ in range(self.width)]] + board
         return board
 
-    # 传递(x轴pos，旋转次数)
-    # 返回score, 是否gameover。step会更新board
+
     def step(self, action, render=True, video=None):
+        '''
+        传递(x轴pos，旋转次数), step会更新board
+
+        :return: 返回score, 是否gameover。
+        '''
         x, num_rotations = action
         # set位置
         self.current_pos = {"x": x, "y": 0}
