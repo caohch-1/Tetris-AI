@@ -336,6 +336,7 @@ class Tetris:
         '''
         传递(x轴pos，旋转次数), step会更新board
 
+        要更换界面名称，需要传递name参数
         :return: 返回score, 是否gameover。
         '''
         x, num_rotations = action
