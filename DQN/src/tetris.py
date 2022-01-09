@@ -448,3 +448,24 @@ class Tetris:
         Min = min(heights)
         max_diff = Max - Min
         return Max, st_dev, Mean, max_diff
+
+    def heuristic_func(self,board):
+        hole_num = self.get_holes(board)
+        maxHeight = self.yaq_state()[0]
+        avgHeight = self.yaq_state()[2]
+        diff = self.yaq_state()[3]
+        return -maxHeight-2.5*avgHeight-1.25*hole_num-1.25*diff
+
+    def get_best_action(self):
+        possible_actions = self.get_next_states().keys()
+        best_action = None
+        max_h = -99999
+
+        for action in possible_actions:
+            current_h = self.heuristic_func(self.board)
+            current_h += (-1.25*self.get_next_states()[action][2]-1.25*self.get_next_states()[action][1]+40*self.get_next_states()[action][0]-1.25*self.get_next_states()[action][3])
+            if current_h > max_h:
+                max_h = current_h
+                best_action = action
+        return best_action
+

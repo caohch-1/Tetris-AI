@@ -423,7 +423,7 @@ class SimplifiedTetrisEngine(object):
                 self._update_grid(False)
 
                 count += 1
-
+        print(available_actions)
         return available_actions
 
     def _get_dellacherie_scores(self) -> np.array:
@@ -626,3 +626,4 @@ class SimplifiedTetrisEngine(object):
         :return: the translation and rotation associated with the action provided.
         """
         return self._all_available_actions[self._piece._idx][action]
+

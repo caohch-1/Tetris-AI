@@ -1,6 +1,7 @@
 """
 @author: Viet Nguyen <nhviet1009@gmail.com>
 """
+import numpy
 import numpy as np
 from PIL import Image
 import cv2
@@ -91,34 +92,34 @@ class Tetris:
             rotated_array.append(new_row)
         return rotated_array
 
-    def get_state_properties(self, board, extra2 = None, col_diff = False):
-        '''
+    def get_state_properties(self, board, extra2=None, col_diff=False):
+        """
         :extra2: 二位列表，适配于get_next_state_img
         :return: 组合list [清除掉的行数，总共的holes数量，颠簸度，总block高度]
-        '''
+        """
         lines_cleared, board = self.check_cleared_rows(board)
         holes = self.get_holes(board)
         bumpiness, height = self.get_bumpiness_and_height(board)
         result = [lines_cleared, holes, bumpiness, height]
-        if col_diff == True:
+        if col_diff:
             board = np.array(board)
             mask = board != 0
             invert_heights = np.where(mask.any(axis=0), np.argmax(mask, axis=0), self.height)
             heights = self.height - invert_heights
-            for i in range(self.width-1):
-                result.append(abs(heights[i] - heights[i+1]))
+            for i in range(self.width - 1):
+                result.append(abs(heights[i] - heights[i + 1]))
 
         if extra2:
+            result = []
             for row in extra2:
                 for item in row:
                     result.append(item)
         return torch.FloatTensor(result)
 
     def get_holes(self, board):
-        '''
-
+        """
         如果一列从上到下是:0 0 0 1 1 1 0 1 0 1，那么hole就是2.这里返回所有hole的总数
-        '''
+        """
         num_holes = 0
         for col in zip(*board):
             row = 0
@@ -128,10 +129,9 @@ class Tetris:
         return num_holes
 
     def get_bumpiness_and_height(self, board):
-        '''
-
+        """
         返回颠簸度和总block高度
-        '''
+        """
         board = np.array(board)
         mask = board != 0
         # 从上往下数，直到block的最高点的 距离。如果宽为10， 那么形式为[20 17 18 20 20 20 20 20 20 20]
@@ -183,6 +183,21 @@ class Tetris:
                 states[(x, i)] = self.get_state_properties(board)
             curr_piece = self.rotate(curr_piece)
         return states
+
+    def count_num(self, piece):
+        id = 0
+        for row in piece:
+            for item in row:
+                if item != 0:
+                    id = item - 1
+                    break
+        if id == 0:  # O piece
+            num_rotations = 1
+        elif id == 2 or id == 3 or id == 4:
+            num_rotations = 2
+        else:
+            num_rotations = 4
+        return num_rotations
 
     def get_next_state_img(self):
         states = {}
@@ -333,11 +348,11 @@ class Tetris:
             board = [[0 for _ in range(self.width)]] + board
         return board
 
-
-    def step(self, action, render=True, video=None):
+    def step(self, action, render=True, video=None, name="Deep Q-Learning Tetris"):
         '''
         传递(x轴pos，旋转次数), step会更新board
 
+        要更换界面名称，需要传递name参数
         :return: 返回score, 是否gameover。
         '''
         x, num_rotations = action
@@ -351,7 +366,7 @@ class Tetris:
             self.current_pos["y"] += 1
             # 是否图形化界面
             if render:
-                self.render(video)
+                self.render(video, name)
         # 查看是否溢出屏幕，是则gameover
         overflow = self.truncate(self.piece, self.current_pos)
         if overflow:
@@ -374,7 +389,7 @@ class Tetris:
 
         return score, self.gameover
 
-    def render(self, video=None):
+    def render(self, video=None, name="Deep Q-Learning Tetris"):
         if not self.gameover:
             # 给每个像素上色。颜色取决于block的shape
             img = [self.piece_colors[p] for row in self.get_current_board_state() for p in row]
@@ -413,5 +428,44 @@ class Tetris:
         if video:
             video.write(img)
 
-        cv2.imshow("Deep Q-Learning Tetris", img)
+        cv2.imshow(name, img)
         cv2.waitKey(1)
+
+    def yaq_state(self):
+        '''
+        # max_x: 当前最高x
+        # std_x: 标准差
+        # avg_x: 均值
+        # max_diff_x: 最大高度差
+        '''
+        board = np.array(self.board)
+        mask = board != 0
+        invert_heights = np.where(mask.any(axis=0), np.argmax(mask, axis=0), self.height)
+        heights = self.height - invert_heights
+        Mean = numpy.mean(heights)
+        st_dev = np.std(heights)
+        Max = max(heights)
+        Min = min(heights)
+        max_diff = Max - Min
+        return Max, st_dev, Mean, max_diff
+
+    def heuristic_func(self,board):
+        hole_num = self.get_holes(board)
+        maxHeight = self.yaq_state()[0]
+        avgHeight = self.yaq_state()[2]
+        diff = self.yaq_state()[3]
+        return -maxHeight-2.5*avgHeight-1.25*hole_num-1.25*diff
+
+    def get_best_action(self):
+        possible_actions = self.get_next_states().keys()
+        best_action = None
+        max_h = -99999
+
+        for action in possible_actions:
+            current_h = self.heuristic_func(self.board)
+            current_h += (-1.25*self.get_next_states()[action][2]-1.25*self.get_next_states()[action][1]+40*self.get_next_states()[action][0]-1.25*self.get_next_states()[action][3])
+            if current_h > max_h:
+                max_h = current_h
+                best_action = action
+        return best_action
+
