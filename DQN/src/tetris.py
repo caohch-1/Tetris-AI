@@ -332,7 +332,7 @@ class Tetris:
             board = [[0 for _ in range(self.width)]] + board
         return board
 
-    def step(self, action, render=True, video=None):
+    def step(self, action, render=True, video=None, name="Deep Q-Learning Tetris"):
         '''
         传递(x轴pos，旋转次数), step会更新board
 
@@ -349,7 +349,7 @@ class Tetris:
             self.current_pos["y"] += 1
             # 是否图形化界面
             if render:
-                self.render(video)
+                self.render(video, name)
         # 查看是否溢出屏幕，是则gameover
         overflow = self.truncate(self.piece, self.current_pos)
         if overflow:
@@ -372,7 +372,7 @@ class Tetris:
 
         return score, self.gameover
 
-    def render(self, video=None):
+    def render(self, video=None, name="Deep Q-Learning Tetris"):
         if not self.gameover:
             # 给每个像素上色。颜色取决于block的shape
             img = [self.piece_colors[p] for row in self.get_current_board_state() for p in row]
@@ -411,5 +411,5 @@ class Tetris:
         if video:
             video.write(img)
 
-        cv2.imshow("Deep Q-Learning Tetris", img)
+        cv2.imshow(name, img)
         cv2.waitKey(1)
