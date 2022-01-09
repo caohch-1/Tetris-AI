@@ -10,6 +10,7 @@ def get_args(train: bool):
         parser.add_argument("--block_size", type=int, default=30)
 
         parser.add_argument("--model", type=int, default=64)
+        parser.add_argument("--input_features", type=int, default=4)
         parser.add_argument("--batch_size", type=int, default=512)
         parser.add_argument("--lr", type=float, default=1e-3)
         parser.add_argument("--gamma", type=float, default=0.99)

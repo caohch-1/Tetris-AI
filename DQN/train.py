@@ -9,29 +9,16 @@ import torch.backends.cudnn as cudnn
 import torch.optim as optim
 
 from src.tetris import Tetris
-from src.nets import ConvNet, MLP
+from src.deep_q_network import MLP
 from src.arg_parser import get_args
 from collections import deque
 
 
-def setup_seed(seed):
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    np.random.seed(seed)
-    random.seed(seed)
-    torch.backends.cudnn.deterministic = True
-
-
 def train(opt):
-    """Preparation for Logging"""
-    if os.path.isdir(opt.log_path):
-        shutil.rmtree(opt.log_path)
-    os.makedirs(opt.log_path)
-
     """Preparation for Network and Tetris Env."""
     env = Tetris(width=opt.width, height=opt.height, block_size=opt.block_size)
     state = env.reset()
-    net = MLP(input_num=4, hidden_num=opt.model)
+    net = MLP(input_num=opt.input_features, hidden_num=opt.model)
     optimizer = optim.Adam(net.parameters(), lr=opt.lr)
     criterion = nn.MSELoss()
     epoch = 0
@@ -50,7 +37,11 @@ def train(opt):
                 opt.initial_epsilon - opt.final_epsilon) / opt.num_decay_epochs)
 
         # Get all possible states
-        next_steps = env.get_next_states()
+        next_steps = None
+        if opt.input_features == 200:
+            next_steps = env.get_next_state_img()
+        elif opt.input_features == 4:
+            next_steps = env.get_next_states()
         next_actions, next_states = zip(*next_steps.items())
         next_states = torch.stack(next_states)
         if torch.cuda.is_available():
@@ -73,7 +64,8 @@ def train(opt):
             next_state = next_state.cuda()
 
         # If game-over and replay_memory (i.e., training data) is sufficient, we train the net
-        replay_memory.append([state, reward, next_state, done])
+        if state.shape[0] == opt.input_features:
+            replay_memory.append([state, reward, next_state, done])
         if done:
             final_score = env.score
             final_tetrominoes = env.tetrominoes
@@ -110,7 +102,6 @@ def train(opt):
         y_batch = torch.cat(
             tuple(reward if done else reward + opt.gamma * prediction for reward, done, prediction in
                   zip(reward_batch, done_batch, next_prediction_batch)))[:, None]
-
         optimizer.zero_grad()
         loss = criterion(q_values, y_batch)
         loss.backward()

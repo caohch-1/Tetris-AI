@@ -1,10 +1,10 @@
+import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
-from src.tetris import Tetris
-from src.nets import ConvNet, MLP
-from src.arg_parser import get_args
 
-import numpy as np
+from src.arg_parser import get_args
+from src.deep_q_network import MLP
+from src.tetris import Tetris
 
 
 def test(opt):
@@ -23,7 +23,7 @@ def test(opt):
     env = Tetris(width=opt.width, height=opt.height, block_size=opt.block_size)
     env.reset()
 
-    while True:
+    while True and env.cleared_lines <= 5000:
         # Get all possible next states
         next_steps = env.get_next_states()
         next_actions, next_states = zip(*next_steps.items())
@@ -41,6 +41,7 @@ def test(opt):
 
         if done:
             return env.score, env.tetrominoes, env.cleared_lines
+    return env.score, env.tetrominoes, env.cleared_lines
 
 
 if __name__ == "__main__":
@@ -52,9 +53,6 @@ if __name__ == "__main__":
         total[0] += temp[0]
         total[1] += temp[1]
         total[2] += temp[2]
-        if i % (opt.test_num / 5) == 0:
-            print(i, np.array(total) / (i + 1))
-
-#要得到 [清除掉的行数，总共的holes数量，颠簸度，总block高度] + 灰度图，调用get_next_state_img(self)而不是之前的get_next_states()
-#如果要额外得到 [清除掉的行数，总共的holes数量，颠簸度，总block高度] + 列差 + 灰度图，调用get_next_state_img(self)，并在这个函数 (line 220)
-# states[(x, i)] = self.get_state_properties(board, temp_board, col_diff=True) 中令 col_diff=True
+        print(i + 1, np.array(total) / (i + 1))
+        # if (i+1) % (opt.test_num / 5) == 0:
+        #     print(i+1, np.array(total) / (i + 1))
