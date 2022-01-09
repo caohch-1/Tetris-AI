@@ -1,6 +1,7 @@
 """
 @author: Viet Nguyen <nhviet1009@gmail.com>
 """
+import numpy
 import numpy as np
 from PIL import Image
 import cv2
@@ -182,6 +183,21 @@ class Tetris:
                 states[(x, i)] = self.get_state_properties(board)
             curr_piece = self.rotate(curr_piece)
         return states
+
+    def count_num(self, piece):
+        id = 0
+        for row in piece:
+            for item in row:
+                if item != 0:
+                    id = item - 1
+                    break
+        if id == 0:  # O piece
+            num_rotations = 1
+        elif id == 2 or id == 3 or id == 4:
+            num_rotations = 2
+        else:
+            num_rotations = 4
+        return num_rotations
 
     def get_next_state_img(self):
         states = {}
@@ -414,3 +430,21 @@ class Tetris:
 
         cv2.imshow(name, img)
         cv2.waitKey(1)
+
+    def yaq_state(self):
+        '''
+        # max_x: 当前最高x
+        # std_x: 标准差
+        # avg_x: 均值
+        # max_diff_x: 最大高度差
+        '''
+        board = np.array(self.board)
+        mask = board != 0
+        invert_heights = np.where(mask.any(axis=0), np.argmax(mask, axis=0), self.height)
+        heights = self.height - invert_heights
+        Mean = numpy.mean(heights)
+        st_dev = np.std(heights)
+        Max = max(heights)
+        Min = min(heights)
+        max_diff = Max - Min
+        return Max, st_dev, Mean, max_diff
