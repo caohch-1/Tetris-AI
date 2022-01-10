@@ -28,7 +28,7 @@ we design three AI agents for  Tetris,  including  heuristics  algorithm,  genet
 
 The notations used throughtout following sections are shown in Table.Ⅰ.
 
-![image-20220110230059220](C:\Users\MSI-PC\AppData\Roaming\Typora\typora-user-images\image-20220110230059220.png)
+![](https://i.bmp.ovh/imgs/2022/01/aa9cd1f032b8e686.png)
 
 Before diving into the detail of three AI agents, we briefly describe three definition used in the following algorithms.
 
@@ -38,9 +38,7 @@ __Block height__. The distance from the lowest non-zero number to the highest no
 
 __Bumpiness.__ The list of difference between the column heights of two adjacent columns.
 
-![image-20220110230136458](C:\Users\MSI-PC\AppData\Roaming\Typora\typora-user-images\image-20220110230136458.png)
-
-
+![](https://i.bmp.ovh/imgs/2022/01/ef7a4ce7b227afa5.png)
 
 
 
