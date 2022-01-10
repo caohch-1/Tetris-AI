@@ -413,7 +413,7 @@ class Tetris:
                     (self.width * self.block_size + int(self.block_size / 2), 2 * self.block_size),
                     fontFace=cv2.FONT_HERSHEY_DUPLEX, fontScale=1.0, color=self.text_color)
 
-        cv2.putText(img, "Pieces:", (self.width * self.block_size + int(self.block_size / 2), 4 * self.block_size),
+        cv2.putText(img, "Tetrominoes:", (self.width * self.block_size + int(self.block_size / 2), 4 * self.block_size),
                     fontFace=cv2.FONT_HERSHEY_DUPLEX, fontScale=1.0, color=self.text_color)
         cv2.putText(img, str(self.tetrominoes),
                     (self.width * self.block_size + int(self.block_size / 2), 5 * self.block_size),
