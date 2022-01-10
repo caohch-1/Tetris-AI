@@ -29,7 +29,7 @@ we design three AI agents for  Tetris,  including  heuristics  algorithm,  genet
 
 The notations used throughtout following sections are shown in Table.Ⅰ.
 
-![table1](G:\AI-Project\DQN\img\table1.png)
+![table1](.\img\table1.png)
 
 Before diving into the detail of three AI agents, we briefly describe three definition used in the following algorithms.
 
@@ -39,7 +39,7 @@ __Block height__. The distance from the lowest non-zero number to the highest no
 
 __Bumpiness.__ The list of difference between the column heights of two adjacent columns.
 
-![picture1](G:\AI-Project\DQN\img\picture1.png)
+![picture1](.\img\picture1.png)
 
 
 
