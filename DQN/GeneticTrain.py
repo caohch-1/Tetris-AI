@@ -4,7 +4,9 @@
 # @Author  :   Jiawen Yang
 
 from genetic import GeneticProcessor
+from src.arg_genetic import get_args
 
 if __name__ == '__main__':
-    gene = GeneticProcessor(10)
+    opt = get_args(train=False)
+    gene = GeneticProcessor(opt.test_num)
     gene.train()

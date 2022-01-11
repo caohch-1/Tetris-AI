@@ -10,6 +10,8 @@ from torch._C import Block
 from genetic import *
 
 
+from src.arg_genetic import get_args
+
 from src.tetris import Tetris
 
 filename_CGBP = "BestChromosome_CGBP.txt"
@@ -37,12 +39,13 @@ def test(t,Best,env:Tetris):
         return None
     
 if __name__ == '__main__':
+    opt = get_args(train=False)
     Score = list()
     Lines = list()
     Blocks = list()
-    for i in range(2):  # ROUND
+    for i in range(opt.test_num):  # ROUND
         env = Tetris()
-        Best = test(300,filename_CFP,env)  # TIME 5MIN
+        Best = test(opt.time,filename_CFP,env)  # TIME 5MIN
         Score.append(Best[0])
         Lines.append(Best[1])
         Blocks.append(Best[2])
