@@ -18,6 +18,7 @@ we design three AI agents for  Tetris,  including  heuristics  algorithm,  genet
 |--TetrisAI/
 |   |--src/
 |      |--arg_parser.py		/* Files for the implementation of arguments used to test parameters in Q-Learning agent
+|      |--arg_genetic.py		/* Files for the implementation of arguments used to test parameters in Genentic-Beam agent
 |      |--tetris.py     /* Files for the implementation of Tetris game
 |      |--arg_parser_heur.py    /*Files for the implementation of arguments used to test parameters in heuristic agent
 |   |--trained_models{K}/
@@ -73,10 +74,13 @@ python heuristic_agent.py --gui=1 --test_num=300 --wi=int ## For detail See src/
 The Genetic-Beam agent converts the solution process into a process similar to the crossover and mutation of the chromosomes in biological evolution. 
 
 - Usage
-
+To train the model,
 ```
-python GeneticTrain.py
-python BestRunner.py
+python GeneticTrain.py --test_num=20       # For detail see src/arg_genetic.py
+```
+To test the model,
+```
+python GeneticTest.py --test_num=300 --time=300       # For detail see src/arg_genetic.py
 ```
 
 
