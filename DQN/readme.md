@@ -45,12 +45,12 @@ __Bumpiness.__ The list of difference between the column heights of two adjacent
 
 ### Heuristic Agent
 
-介绍这个Agent
+This agent uses 8 features to calculate a score for each action and choose the best action with the highest score to execute.
 
 - Usage
 
 ```
-python PLRperiodisdfsdf.py #这里只是example，需要修改
+python heuristic_agent.py
 ```
 
 
