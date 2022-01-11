@@ -31,14 +31,15 @@ curr_piece = [row[:] for row in env.piece]
 piece = [row[:] for row in curr_piece]
 piece = [[5], [5], [5], [5]]
 #print(env.check_collision(piece, pos))
-shit = env.get_next_state_img()
+shit = env.get_next_states()
 print(shit)
-# next_actions, next_states = zip(*shit.items())
-# print(next_actions)
-# print(next_states)
-# next_states = torch.stack(next_states)
-# print(next_states)
+next_actions, next_states = zip(*shit.items())
+print(next_actions)
+print(next_states)
+next_states = torch.stack(next_states)
+print(next_states)
 for row in env.board:
     for item in row:
         print(item, end=" ")
     print(" ", end="\n")
+print(env.yaq_state())
