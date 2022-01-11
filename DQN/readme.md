@@ -20,6 +20,8 @@ we design three AI agents for  Tetris,  including  heuristics  algorithm,  genet
 |      |--arg_parser.py		/* Files 
 |      |--tetris.py     /* Files for the implementation of Tetris game
 |      |--arg_parser_heur.py    /*Files for the implementation of arguments used to test parameters in heuristic agent
+|   |--trained_models*/
+|      |--tetris		/* Model of ... \TBD chc
 |   |--img/      /* Folder for images
 |   |--genetic.py                /* Files for applying Genetic-Beam Search algorithm
 |   |--GeneticTrain.py           /* Files for training best chromosomes for Tetris game
