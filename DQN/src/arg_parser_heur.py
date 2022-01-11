@@ -17,9 +17,9 @@ def get_args(train: bool):
     parser.add_argument("--w3", type=int, default=5)
     parser.add_argument("--w4", type=int, default=-1)
     parser.add_argument("--w5", type=int, default=40)
-    parser.add_argument("--w6", type=int, default=-1)
+    parser.add_argument("--w6", type=int, default=-5)
     parser.add_argument("--w7", type=int, default=-1)
-    parser.add_argument("--w8", type=int, default=-1)
+    parser.add_argument("--w8", type=int, default=-5)
 
 
     args = parser.parse_args()
