@@ -50,7 +50,7 @@ __Bumpiness.__ The list of difference between the column heights of two adjacent
 - Usage
 
 ```
-python PLRperiodic.py #这里只是example，需要修改
+python PLRperiodisdfsdf.py #这里只是example，需要修改
 ```
 
 
