@@ -65,12 +65,14 @@ python heuristic_agent.py
 
 ### Genetic-Beam Agent
 
-介绍这个Agent
+The Genetic-Beam agent converts the solution process into a process similar to the crossover and mutation of the chromosomes in biological evolution. 
 
 - Usage
 
 ```
-python predictor.py #这里只是example，需要修改
+python GeneticTrain.py
+BestRunner.py
+
 ```
 
 
