@@ -62,7 +62,8 @@ This agent uses 8 features to calculate a score for each action and choose the b
 - Usage
 
 ```
-python heuristic_agent.py
+#wi is the weight of 8 features, to change it, do as the following.
+python heuristic_agent.py --gui=1 --test_num=300 --wi=int ## For detail See src/arg_parser_heur.py
 ```
 
 
