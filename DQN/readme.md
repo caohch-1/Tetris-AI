@@ -74,6 +74,7 @@ python heuristic_agent.py --gui=1 --test_num=300 --wi=int ## For detail See src/
 The Genetic-Beam agent converts the solution process into a process similar to the crossover and mutation of the chromosomes in biological evolution. 
 
 - Usage
+
 To train the model,
 ```
 python GeneticTrain.py --test_num=20       # For detail see src/arg_genetic.py
