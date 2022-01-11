@@ -72,7 +72,6 @@ The Genetic-Beam agent converts the solution process into a process similar to t
 ```
 python GeneticTrain.py
 BestRunner.py
-
 ```
 
 
