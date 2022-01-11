@@ -85,19 +85,25 @@ An reinforcement learning Agent using Deep Q-Network (DQN
 
 - Usage
 
+To train the model,
 ```
 # Make sure saved_path is a existing directory
 python QLearningTrain.py --model=32 --save_interval=500 --saved_path=trained_models32 --gui=1 # For detail See src/arg_parser.py
-python QLearningTest.py --saved_path=trained_models32 --gui=1 --test_num=500 # # For detail See src/arg_parser.py
 ```
 
+To test the model,
+```
+# Make sure saved_path is a existing directory
+python QLearningTest.py --saved_path=trained_models32 --gui=1 --test_num=500 # # For detail See src/arg_parser.py
+```
+Notice that the usages above are for reference. To check the performances under different parameters, please see src/arg_parser.py for detail.
 
 
 ## Evaluation
 
 **Experiment settings.**
 
-To cater for the needs of our methods, we modify  and integrate some Tetris implementations on GitHub. To evaluate the three methods of Tetris agent, we set $N=10$, $M=20$ (i.e., a $N\times M$ grid) as our test environment.
+To cater for the needs of our methods, we modify  and integrate some Tetris implementations on GitHub. To evaluate the three methods of Tetris agent, we set N=10, M=20 (i.e., a N×M grid) as our test environment.
 
 
 
