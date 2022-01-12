@@ -4,11 +4,19 @@ The code for project "AI for Tetris" in CS181, ShanghaiTech University.
 
 ## Introduction
 
-\TBD
+Tetris is one of the most popular video games. It is difficult to quantify and model for a satisfying strategy for human players, but the AI agent can be designed in multiple ways for this game.
+
+In this work,we explore three Tetris AI agents:
+
+Heuistic Agent: As a classic method dealing with search problem, it provide us with a basic but effective idea to get a higher score in Tetris
+
+Genetic-Beam Agent: An algorithm simulates the natural evolution process to find the optimal solution.
+
+Q-Learning Agent: An reinforcement learning based algorithm using Deep Q-Network (DQN).
 
 ### **What task does our code (method) solve?**
 
-we design three AI agents for  Tetris,  including  heuristics  algorithm,  genetic-beam  search,and  deep  Q-learning,  and  conduct  a  comprehensive  evaluation. Experiments  show  that  (TBD)has  the  best  performance,  which arrives(T BD)for  average  scores,(T BD)for  average  tetrominoes,  and(T BD)for  average  cleared  lines.
+we design three AI agents for Tetris, including heuristics algorithm, genetic-beam search,and deep Q-learning, and conduct a comprehensive evaluation. The Comparison experiments show that the Q-Learning Agent has the best performance in general, which arrives 21887.584 for average scores, and 934.67 for average cleared lines by fixing the number of Tetrominoes to 2500.
 
 
 
@@ -118,4 +126,6 @@ In order to evaluate the efficiency of methods implementing Tetris agent, we cho
 
 ## Conclusion
 
-TBD
+We design three AI agents for Tetris, including heuristics algorithm, genetic-beam search,
+and deep Q-learning, and conduct a comprehensive evaluation for the hyper-paramaters of each agent. We also explore the potential reasons for the effects of the hyper-parameters. Among there agents, both Genetic-Beam Agent and DQN Agent can achieve a great performance that hardly meet game over with proper hyper-parameters. The Comparison experiments show that the Q-Learning Agent has the best performance in general, which arrives 21887.584 for average scores, and 934.67 for average cleared lines by fixing the number of Tetrominoes to 2500.
+
