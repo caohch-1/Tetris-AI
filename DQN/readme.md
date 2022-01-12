@@ -118,7 +118,7 @@ Notice that the usages above are for reference. To check the performances under 
 
 **Experiment settings.**
 
-To cater for the needs of our methods, we modify  and integrate some Tetris implementations on GitHub. To evaluate the three methods of Tetris agent, we set N=10, M=20 (i.e., a N×M grid) as our test environment.
+To cater for the needs of our methods, we modify  and integrate some Tetris implementations on GitHub. To evaluate the three methods of Tetris agent, we set N=10, M=20 (i.e., a 10×20 grid) as our test environment.
 
 
 
