@@ -69,10 +69,12 @@ This agent uses 8 features to calculate a score for each action and choose the b
 
 - Usage
 
+To run at default weights,
 ```
-python heuristic_agent.py --gui=1 --test_num=300 ## For detail See src/arg_parser_heur.py
+python heuristic_agent.py --gui=1 --test_num=300
 ```
-If you want to change the weight of 8 features, add --w1=-1 --w2=-2... --w8=-5 to the command to change weights of each feature.
+To change the weight of 8 features, add --w1=-1 --w2=-2... --w8=-5 to the command to change weights of each feature.(For detail See src/arg_parser_heur.py)
+
 e.g. 
 ```
 python heuristic_agent.py --gui=1 --test_num=300 --w1=-1 --w2=5
