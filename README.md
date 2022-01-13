@@ -49,7 +49,7 @@ we design three AI agents for Tetris, including heuristics algorithm, genetic-be
 
 The notations used throughtout following sections are shown in Table.Ⅰ.
 
-![table1](https://github.com/caohch-1/AI-Project/blob/main/DQN/img/table1.png)
+![table1](https://github.com/caohch-1/AI-Project/blob/main/img/table1.png)
 
 Before diving into the detail of three AI agents, we briefly describe three definition used in the following algorithms.
 
@@ -59,7 +59,7 @@ __Block height__. The distance from the lowest non-zero number to the highest no
 
 __Bumpiness.__ The list of difference between the column heights of two adjacent columns.
 
-![picture1](https://github.com/caohch-1/AI-Project/blob/main/DQN/img/picture1.png)
+![picture1](https://github.com/caohch-1/AI-Project/blob/main/img/picture1.png)
 
 
 
