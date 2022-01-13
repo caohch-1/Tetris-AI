@@ -1,8 +1,0 @@
-networkx
-pyswip
-numpy
-mpmath
-pygame
-pygame-menu
-matplotlib
-pyautogui
