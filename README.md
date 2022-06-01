@@ -1,22 +1,22 @@
 # AI for Tetris
 
-The code for project "AI for Tetris" in CS181, ShanghaiTech University.
+The code for the project "AI for Tetris" in CS181, ShanghaiTech University.
 
 ## Introduction
 
-Tetris is one of the most popular video games. It is difficult to quantify and model for a satisfying strategy for human players, but the AI agent can be designed in multiple ways for this game.
+Tetris is one of the most popular video games. It is difficult to quantify and model a satisfying strategy for human players, but the AI agent can be designed in multiple ways for this game.
 
-In this work,we explore three Tetris AI agents:
+In this work, we explore three Tetris AI agents:
 
-Heuistic Agent: As a classic method dealing with search problem, it provide us with a basic but effective idea to get a higher score in Tetris
+Heuristic Agent: As a classic method of dealing with search problem, it provides us with a basic but effective idea to get a higher score in Tetris
 
 Genetic-Beam Agent: An algorithm simulates the natural evolution process to find the optimal solution.
 
-Q-Learning Agent: An reinforcement learning based algorithm using Deep Q-Network (DQN).
+Q-Learning Agent: An reinforcement learning-based algorithm using Deep Q-Network (DQN).
 
 ### **What task does our code (method) solve?**
 
-we design three AI agents for Tetris, including heuristics algorithm, genetic-beam search,and deep Q-learning, and conduct a comprehensive evaluation. The Comparison experiments show that the Q-Learning Agent has the best performance in general, which arrives 21887.584 for average scores, and 934.67 for average cleared lines by fixing the number of Tetrominoes to 2500.
+we design three AI agents for Tetris, including a heuristics algorithm, genetic-beam search, and deep Q-learning, and conduct a comprehensive evaluation. The Comparison experiments show that the Q-Learning Agent has the best performance in general, which arrives at 21887.584 for average scores, and 934.67 for average cleared lines by fixing the number of Tetrominoes to 2500.
 
 
 
@@ -100,7 +100,7 @@ python GeneticTest.py --test_num=300 --time=300       # For detail see src/arg_g
 
 ### Q-Learning Agent
 
-An reinforcement learning Agent using Deep Q-Network (DQN
+A reinforcement learning Agent using Deep Q-Network (DQN
 
 - Usage
 
@@ -122,14 +122,14 @@ Notice that the usages above are for reference. To check the performances under 
 
 **Experiment settings.**
 
-To cater for the needs of our methods, we modify  and integrate some Tetris implementations on GitHub. To evaluate the three methods of Tetris agent, we set N=10, M=20 (i.e., a 10×20 grid) as our test environment.
+To cater to the needs of our methods, we modify and integrate some Tetris implementations on GitHub. To evaluate the three methods of Tetris agent, we set N=10, and M=20 (i.e., a 10×20 grid) as our test environment.
 
 
 
-In order to evaluate the efficiency of methods implementing Tetris agent, we choose three scoring criteria to quantify the performance of different methods. To see the full evaluation, please read our report article.
+To evaluate the efficiency of methods implementing the Tetris agent, we choose three scoring criteria to quantify the performance of different methods. To see the full evaluation, please read our report article.
 
 ## Conclusion
 
-We design three AI agents for Tetris, including heuristics algorithm, genetic-beam search,
-and deep Q-learning, and conduct a comprehensive evaluation for the hyper-paramaters of each agent. We also explore the potential reasons for the effects of the hyper-parameters. Among there agents, both Genetic-Beam Agent and DQN Agent can achieve a great performance that hardly meet game over with proper hyper-parameters. The Comparison experiments show that the Q-Learning Agent has the best performance in general, which arrives 21887.584 for average scores, and 934.67 for average cleared lines by fixing the number of Tetrominoes to 2500.
+We design three AI agents for Tetris, including a heuristics algorithm, genetic-beam search,
+and deep Q-learning, and conduct a comprehensive evaluation for the hyper-parameters of each agent. We also explore the potential reasons for the effects of the hyper-parameters. Among these agents, both Genetic-Beam Agent and DQN Agent can achieve a great performance that hardly meets game over with proper hyper-parameters. The Comparison experiments show that the Q-Learning Agent has the best performance in general, which arrives at 21887.584 for average scores, and 934.67 for average cleared lines by fixing the number of Tetrominoes to 2500.
 
